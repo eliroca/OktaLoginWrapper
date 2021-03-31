@@ -7,11 +7,12 @@ Provide an easy way for your scripts to access ressources behind an Okta SSO sol
 * Python 3
 * An Okta account 
 
-### Installing
+### Installing this fork
 
-oktaloginwrapper is now available on Pypi. Simply install it with:
+Check if your distro is supported [here](https://software.opensuse.org/search?q=oktaloginwrapper),
+ or [here](https://build.opensuse.org/package/show/home:eroca/python-oktaloginwrapper).
 
-```pip install oktaloginwrapper```
+Original project from B-Souty (last release: Dec 12, 2018) is available on [PyPI](https://pypi.org/project/oktaloginwrapper).
 
 ## Getting Started
 
