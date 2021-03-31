@@ -50,6 +50,8 @@ class OktaSession(object):
         Calls:
             _okta_verify() with auth_params and factor_type as arguments
             if username/password are correct.
+        
+        Raises ConnectionError if authentication errors appear.
         """
         if answer:
             factor_type = 'question'
@@ -63,6 +65,9 @@ class OktaSession(object):
                         "multiOptionalFactorEnroll": True},
         })
         response = self.okta_session.post(url_authn, data=payload_authn)
+
+        if response.status_code != 200:
+            raise ConnectionError("Unable to connect. Reason: {} {}".format(response.status_code, response.reason))
 
         if response.json().get('status') == "SUCCESS":
             self._session_token = response.json().get('sessionToken')
@@ -96,6 +101,8 @@ class OktaSession(object):
 
         Returns:
             The Okta session is updated with the required cookies for future connection.
+        
+        Raises ConnectionError if authentication errors appear.
         """
         url_push = "https://{}.okta.com/api/v1/authn/factors/{}/verify".format(self.organization, auth_params['factor_id'])
         response = self.okta_session.post(url_push, data=json.dumps(auth_params))
@@ -107,14 +114,14 @@ class OktaSession(object):
                 timer = int(timeout - time.time())
                 if timer <= 0:
                     self.okta_session.close()
-                    return "Connection timed out."
+                    raise ConnectionError("Connection timed out.")
                 print("{} seconds remaining before timeout.".format(timer))
                 time.sleep(2)
                 response = self.okta_session.post(url_push, data=json.dumps(auth_params))
                 mfa_state = json.loads(response.text).get('status')
                 if json.loads(response.text).get('factorResult') == 'REJECTED':
                     self.okta_session.close()
-                    return "You rejected the connection, closing the session."
+                    raise ConnectionError("You rejected the connection, closing the session.")
 
         if factor_type == 'question':
             while mfa_state != 'SUCCESS':
@@ -134,7 +141,7 @@ class OktaSession(object):
         self._session_token = json.loads(response.text).get('sessionToken')
         self._user_id = json.loads(response.text).get('_embedded').get('user').get('id')
         self._cookie_brewer()
-        return "You are now logged in."
+        return "Successfully logged in."
 
     def _cookie_brewer(self):
         cookie_brewer_url = 'https://{0}.okta.com/login/sessionCookieRedirect?checkAccountSetupComplete=true&token={1}&redirectUrl=https%3A%2F%2F{0}.okta.com%2Fuser%2Fnotifications'.format(self.organization, self._session_token)
@@ -151,7 +158,6 @@ class OktaSession(object):
             "Accept-Encoding": "gzip, deflate, br",
             "Accept-Language": "en-US,en;q=0.9,fr;q=0.8,nl;q=0.7",
         }
-
         return self.okta_session.get(url=appslist_url, headers=appslist_headers).json()
 
     def connect_to(self, url_app):
@@ -183,7 +189,7 @@ class OktaSession(object):
         return self.okta_session.post(url=url_saml, data=payload_saml, headers=headers_saml)
 
     def connect_from_appslist(self):
-        """Provide an nteractive way to connect to an app"""
+        """Provide an interactive way to connect to an app"""
         app_name = input('app name: ').lower()
         results = [{'name': i.get('label'), 'link': i.get('linkUrl')} for i in self.app_list() if app_name in i.get('label').lower()]
         for ind, app in enumerate(results):
