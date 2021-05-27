@@ -9,7 +9,7 @@ import json
 import time
 
 
-class OktaSession(object):
+class OktaSession:
     """An Okta session
 
     Provide an Okta session with the proper cookies to login to apps.
