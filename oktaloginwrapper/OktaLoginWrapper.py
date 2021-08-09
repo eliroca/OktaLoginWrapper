@@ -50,7 +50,7 @@ class OktaSession:
         Calls:
             _okta_verify() with auth_params and factor_type as arguments
             if username/password are correct.
-        
+
         Raises ConnectionError if authentication errors appear.
         """
         if answer:
@@ -68,6 +68,9 @@ class OktaSession:
 
         if response.status_code != 200:
             raise ConnectionError("Unable to connect. Reason: {} {}".format(response.status_code, response.reason))
+
+        if response.json().get('status') == 'PASSWORD_EXPIRED':
+            raise ConnectionError('Unable to connect. Reason: PASSWORD_EXPIRED')
 
         if response.json().get('status') == "SUCCESS":
             self._session_token = response.json().get('sessionToken')
@@ -101,7 +104,7 @@ class OktaSession:
 
         Returns:
             The Okta session is updated with the required cookies for future connection.
-        
+
         Raises ConnectionError if authentication errors appear.
         """
         url_push = "https://{}.okta.com/api/v1/authn/factors/{}/verify".format(self.organization, auth_params['factor_id'])
