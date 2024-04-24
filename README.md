@@ -9,8 +9,8 @@ Provide an easy way for your scripts to access ressources behind an Okta SSO sol
 
 ### Installing this fork
 
-Check if your distro is supported [here](https://software.opensuse.org/search?q=oktaloginwrapper),
- or [here](https://build.opensuse.org/package/show/home:eroca/python-oktaloginwrapper).
+Check if your distro is supported on [software.opensuse.org](https://software.opensuse.org/search?q=oktaloginwrapper),
+ or on [build.opensuse.org](https://build.opensuse.org/package/show/home:eroca:python/python-oktaloginwrapper).
 
 Original project from B-Souty (last release: Dec 12, 2018) is available on [PyPI](https://pypi.org/project/oktaloginwrapper).
 
